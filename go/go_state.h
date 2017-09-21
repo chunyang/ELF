@@ -25,12 +25,12 @@ public:
 
 class GoState {
 protected:
-    Board _board;
     Board _last_board;
     HandicapTable _handi_table;
     BoardFeature _bf;
 
 public:
+    Board _board;
     GoState() : _bf(_board) { Reset(); }
     bool ApplyMove(Coord c);
     void Reset();
@@ -126,8 +126,16 @@ public:
 };
 
 class OnlinePlayer: public Loader {
+private:
+    uint64_t _game_count;
+    std::string get_current_player();
+    bool GameIsDone(const Coord &m);
+    std::string sgf_string;
+protected:
+    static std::unique_ptr<TarWriter> _tar_writer;
 public:
     OnlinePlayer() { }
+    static void InitSharedTarWriter(const std::string &tar_filename);
     void SaveTo(GameState &state) override;
     void Next(int64_t action) override;
 };

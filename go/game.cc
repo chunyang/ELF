@@ -30,7 +30,9 @@ GoGame::GoGame(int game_idx, const GameOptions& options) : _options(options), _c
     _rng.seed(seed);
 
     if (_options.online) {
-        _loaders.emplace_back(new OnlinePlayer());
+        auto p = new OnlinePlayer();
+        p->InitSharedTarWriter("go_results.tar");
+        _loaders.emplace_back(p);
     } else {
         // Open many offline instances.
         for (int i = 0; i < _options.num_games_per_thread; ++i) {

@@ -249,6 +249,10 @@ bool OfflineLoader::save_forward_moves(const BoardFeature &bf, vector<int64_t> *
     return true;
 }
 
+void OnlinePlayer::InitSharedTarWriter(const std::string &tar_filename) {
+    _tar_writer.reset(new TarWriter(tar_filename));
+}
+
 void OnlinePlayer::SaveTo(GameState &gs) {
     gs.move_idx = _state.GetPly();
     gs.winner = 0;
@@ -256,16 +260,37 @@ void OnlinePlayer::SaveTo(GameState &gs) {
     bf.Extract(&gs.s);
 }
 
+bool OnlinePlayer::GameIsDone(const Coord &m) {
+    return !_state.ApplyMove(m);
+}
+
+std::string OnlinePlayer::get_current_player() {
+    auto stone = _state._board._next_player;
+    if (stone == S_BLACK) {
+      return "B";
+    } else if (stone == S_WHITE) {
+      return "W";
+    } else {
+      return "";
+    }
+}
+
 void OnlinePlayer::Next(int64_t action) {
     // From action to coord.
     _state.last_board() = _state.board();
     Coord m = _state.last_extractor().Action2Coord(action);
+    sgf_string += ";" + get_current_player() + "[" + coord2str(m) + "]\n";
     // Play it.
-    if (! _state.ApplyMove(m)) {
+    if (GameIsDone(m)) {
         cout << "Invalid action! action = " << action << " x = " << X(m) << " y = " << Y(m) << coord2str(m) << " please try again" << endl;
+        _game_count++;
+        if (_tar_writer != nullptr) {
+          _tar_writer->Write("game_" + _game_count, sgf_string);
+        }
+        sgf_string = "";
+        _state.Reset();
     }
 }
-
 
 void Loader::UndoMove() {
     _state.board() = _state.last_board();

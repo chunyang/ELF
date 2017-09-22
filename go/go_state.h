@@ -5,6 +5,7 @@
 #include "board.h"
 #include "board_feature.h"
 #include "elf/shared_replay_buffer.h"
+#include "elf/tar_loader.h"
 #include <sstream>
 #include <map>
 #include <vector>

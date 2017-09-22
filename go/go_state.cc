@@ -249,6 +249,8 @@ bool OfflineLoader::save_forward_moves(const BoardFeature &bf, vector<int64_t> *
     return true;
 }
 
+std::unique_ptr<TarWriter> OnlinePlayer::_tar_writer;
+
 void OnlinePlayer::InitSharedTarWriter(const std::string &tar_filename) {
     _tar_writer.reset(new TarWriter(tar_filename));
 }
